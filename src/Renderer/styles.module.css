@@ -1,0 +1,9 @@
+.renderer-container {
+  width: 100vw;
+  height: 100vh;
+}
+
+.renderer-container canvas {
+  width: inherit;
+  height: inherit;
+}
