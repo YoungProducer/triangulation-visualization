@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState } from 'react';
 
-import { RootScene } from "../Scene"
+import { RootScene } from '../Scene';
 import styles from './styles.module.css';
 
 export const Renderer = () => {
@@ -17,7 +17,5 @@ export const Renderer = () => {
     scene.init();
   }, [scene]);
 
-  return (
-    <div ref={setContainerRef} className={styles['renderer-container']}/>
-  )
-}
+  return <div ref={setContainerRef} className={styles['renderer-container']} />;
+};
