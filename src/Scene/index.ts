@@ -23,9 +23,9 @@ export class RootScene {
       70,
       window.innerWidth / window.innerHeight,
       0.01,
-      10
+      100
     );
-    this.camera.position.z = 10;
+    this.camera.position.z = 60;
 
     this.scene.add(this.camera);
 

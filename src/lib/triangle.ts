@@ -6,11 +6,13 @@ import {
   Vector3,
 } from 'three';
 import { RootScene } from '../Scene';
+import { Edge } from './edge';
 
 export class Triangle {
   a: Vector2;
   b: Vector2;
   c: Vector2;
+  isBad = false;
   circumCenter!: Vector2;
   circumRadius!: number;
 
@@ -87,5 +89,13 @@ export class Triangle {
 
     const line = new LineLoop(geometry, material);
     renderer.addToRenderer(line);
+  };
+
+  public getEdgesArray = () => {
+    return [
+      new Edge(this.a, this.b),
+      new Edge(this.b, this.c),
+      new Edge(this.c, this.a),
+    ];
   };
 }
