@@ -39,6 +39,32 @@ export const getTriangleDrawingData = (triangle: Triangle) => {
   return line;
 };
 
+export const getCircumCircleDrawingData = (triangle: Triangle) => {
+  const points: Vector3[] = [];
+
+  for (let i = 0; i <= 32; i++) {
+    const theta = (i / 32) * Math.PI * 2;
+    points.push(
+      new Vector3(
+        Math.cos(theta) * triangle.circumRadius,
+        Math.sin(theta) * triangle.circumRadius,
+        0
+      )
+    );
+  }
+
+  const geometry = new BufferGeometry().setFromPoints(points);
+  const material = new LineBasicMaterial({
+    color: 0x00ff00,
+    linewidth: 4,
+  });
+
+  const line = new LineLoop(geometry, material);
+  line.position.x = triangle.circumCenter.x;
+  line.position.y = triangle.circumCenter.y;
+  return line;
+};
+
 export const getPointsFromEdges = (edges: Edge[]) => {
   if (edges.length !== 3) return undefined;
 
@@ -64,4 +90,39 @@ export const getPointsFromEdges = (edges: Edge[]) => {
     b,
     c,
   };
+};
+
+export const valuesEquals = (left: number, right: number, ulp = 2) => {
+  return (
+    Math.abs(left - right) <= Number.EPSILON * Math.abs(left + right) * ulp ||
+    Math.abs(left - right) < Number.MIN_VALUE
+  );
+};
+
+export const vectorsEquals = (left: Vector2, right: Vector2) => {
+  return valuesEquals(left.y, right.y) && valuesEquals(left.x, right.x);
+};
+
+export const edgesEquals = (left: Edge, right: Edge) => {
+  return (
+    (vectorsEquals(left.a, right.a) && vectorsEquals(left.b, right.b)) ||
+    (vectorsEquals(left.b, right.a) && vectorsEquals(left.a, right.b))
+  );
+};
+
+export const promiseWrapper = (
+  cb: (...args: unknown[]) => unknown,
+  delay: number
+): Promise<unknown> => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(cb());
+    }, delay);
+  });
+};
+
+export const getRandomIntInclusive = (min: number, max: number) => {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1)) + min; //Максимум и минимум включаются
 };

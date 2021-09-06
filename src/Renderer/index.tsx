@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Vector2 } from 'three';
+import { getRandomIntInclusive } from '../lib/helpers';
 import { Triangulation } from '../lib/triangulation';
 
 import { RootScene } from '../Scene';
@@ -7,9 +8,10 @@ import styles from './styles.module.css';
 
 const triangulation = new Triangulation();
 
-const vertices = [new Vector2(-1, 0), new Vector2(1, 0), new Vector2(0, 1)];
-
-triangulation.triangulate(vertices);
+const randomVertices = [...Array(100)].map(
+  () =>
+    new Vector2(getRandomIntInclusive(-30, 30), getRandomIntInclusive(-30, 30))
+);
 
 export const Renderer = () => {
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
@@ -23,7 +25,8 @@ export const Renderer = () => {
   useEffect(() => {
     if (!scene) return;
     scene.init();
-    triangulation.draw(scene);
+    triangulation.setRenderer(scene);
+    triangulation.triangulate(randomVertices);
   }, [scene]);
 
   return <div ref={setContainerRef} className={styles['renderer-container']} />;

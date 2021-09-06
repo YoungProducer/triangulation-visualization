@@ -77,4 +77,8 @@ export class RootScene {
   public addToRenderer = (...object: Object3D[]) => {
     this.scene.add(...object);
   };
+
+  public removeFromRenderer = (...object: Object3D[]) => {
+    this.scene.remove(...object);
+  };
 }

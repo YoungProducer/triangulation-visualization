@@ -2,11 +2,13 @@ import {
   BufferGeometry,
   LineBasicMaterial,
   LineLoop,
+  Object3D,
   Vector2,
   Vector3,
 } from 'three';
 import { RootScene } from '../Scene';
 import { Edge } from './edge';
+import { getCircumCircleDrawingData, getTriangleDrawingData } from './helpers';
 
 export class Triangle {
   a: Vector2;
@@ -15,42 +17,21 @@ export class Triangle {
   isBad = false;
   circumCenter!: Vector2;
   circumRadius!: number;
+  triangleObject: Object3D;
+  circleObject: Object3D;
 
   constructor(a: Vector2, b: Vector2, c: Vector2) {
     this.a = a;
     this.b = b;
     this.c = c;
 
-    this.calculateCircum();
+    // this.calculateCircum();
+    this.calcCircumcircle();
+    this.triangleObject = getTriangleDrawingData(this);
+    this.circleObject = getCircumCircleDrawingData(this);
   }
 
-  public calculateCircum = () => {
-    const ab = this.a.length();
-    const cd = this.b.length();
-    const ef = this.c.length();
-
-    const ax = this.a.x;
-    const ay = this.a.y;
-    const bx = this.b.x;
-    const by = this.b.y;
-    const cx = this.c.x;
-    const cy = this.c.y;
-
-    const circum_x =
-      (ab * (cy - by) + cd * (ay - cy) + ef * (by - ay)) /
-      (ax * (cy - by) + bx * (ay - cy) + cx * (by - ay));
-    const circum_y =
-      (ab * (cx - bx) + cd * (ax - cx) + ef * (bx - ax)) /
-      (ay * (cx - bx) + by * (ax - cx) + cy * (bx - ax));
-
-    this.circumCenter = new Vector2(circum_x / 2, circum_y / 2);
-    this.circumRadius = this.a.distanceTo(this.circumCenter);
-  };
-
-  public circleCircumContains = (v: Vector2) => {
-    const dist = v.distanceTo(this.circumCenter);
-    return dist <= this.circumRadius;
-  };
+  public getDrawingObjects = () => [this.triangleObject];
 
   public drawTriangle = (renderer: RootScene) => {
     const points: Vector3[] = [];
@@ -97,5 +78,48 @@ export class Triangle {
       new Edge(this.b, this.c),
       new Edge(this.c, this.a),
     ];
+  };
+
+  calcCircumcircle = () => {
+    // Reference: http://www.faqs.org/faqs/graphics/algorithms-faq/ Subject 1.04
+    const A = this.b.x - this.a.x;
+    const B = this.b.y - this.a.y;
+    const C = this.c.x - this.a.x;
+    const D = this.c.y - this.a.y;
+
+    const E = A * (this.a.x + this.b.x) + B * (this.a.y + this.b.y);
+    const F = C * (this.a.x + this.c.x) + D * (this.a.y + this.c.y);
+
+    const G = 2.0 * (A * (this.c.y - this.b.y) - B * (this.c.x - this.b.x));
+
+    let dx, dy;
+
+    // Collinear points, get extremes and use midpoint as center
+    if (Math.round(Math.abs(G)) == 0) {
+      const minx = Math.min(this.a.x, this.b.x, this.c.x);
+      const miny = Math.min(this.a.y, this.b.y, this.c.y);
+      const maxx = Math.max(this.a.x, this.b.x, this.c.x);
+      const maxy = Math.max(this.a.y, this.b.y, this.c.y);
+
+      this.circumCenter = new Vector2((minx + maxx) / 2, (miny + maxy) / 2);
+
+      dx = this.circumCenter.x - minx;
+      dy = this.circumCenter.y - miny;
+    } else {
+      const cx = (D * E - B * F) / G;
+      const cy = (A * F - C * E) / G;
+
+      this.circumCenter = new Vector2(cx, cy);
+
+      dx = this.circumCenter.x - this.a.x;
+      dy = this.circumCenter.y - this.a.y;
+    }
+    this.circumRadius = Math.sqrt(dx * dx + dy * dy);
+  };
+
+  inCircumcircle = (v: Vector2) => {
+    const dx = this.circumCenter.x - v.x;
+    const dy = this.circumCenter.y - v.y;
+    return Math.sqrt(dx * dx + dy * dy) <= this.circumRadius;
   };
 }
